@@ -1,0 +1,209 @@
+openapi: 3.0.3
+info:
+  title: PruebaTecnicaZara
+  description: |-
+    API Rest for the Menu Service related with My Coffee Shop App.
+  termsOfService: http://swagger.io/terms/
+  contact:
+    name: Francisco Villegas Ostos
+    email: francisco.villegasostos@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.11
+tags:
+  - name: product
+    description: API for the manage of the products.
+paths:
+  /products:
+    get:
+      tags:
+        - product
+      summary: Retrieve a list with all the products from the menu.
+      description: Retrieve a list with all the products from the menu. We can filter using type of product or enabled flag.
+      operationId: getProducts
+      parameters:
+        - name: type
+          in: query
+          description: Type of the product.
+          required: false
+          schema:
+            $ref: '#/components/schemas/ProductTypeEnum'
+        - name: isEnabled
+          in: query
+          description: Flag for filtering enabled products (by default will be true).
+          required: false
+          schema:
+            type: boolean
+            example: true
+      responses:
+        '200':
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuProductList'
+        '400':
+          description: Bad Request. There was an error processing the input data.
+        '404':
+          description: Not found. Products could not be found for the given filters.
+        '500':
+          description: Internal Server Error. Generic and unexpected error of the microservice.
+    post:
+      tags:
+        - product
+      summary: Save a new product for the menu.
+      description: Register a new product for the menu. Information necessary for this product is the name, price, type of product and enabled flag.
+      operationId: postProducts
+      requestBody:
+        description: Information necessary for saving a new product.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductItem'
+      responses:
+        '201':
+          description: Created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedProductItem'
+        '400':
+          description: Bad Request. There was an error processing the input data.
+        '500':
+          description: Internal Server Error. Generic and unexpected error of the microservice.
+  /products/{productId}:
+    put:
+      tags:
+        - product
+      summary: Update an existing product for the menu.
+      description: Update an existing product for the menu. Information avaliable for updating are the price or the state of the product (enabled or not).
+      operationId: putProducts
+      parameters:
+        - name: productId
+          in: path
+          description: Identifier of the product to update
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 20
+            example: '67223d0a3d757282382b7bd5'
+      requestBody:
+        description:  Information necessary for updating a product.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductInfo'
+      responses:
+        '200':
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedProductItem'
+        '400':
+          description: Bad Request. There was an error processing the input data.
+        '404':
+          description: Not found. Product could not be found with such id.
+        '500':
+          description: Internal Server Error. Generic and unexpected error of the microservice.
+  /products/{productId}/disable:
+    delete:
+      tags:
+        - product
+      summary: Set a product as disabled for the menu.
+      description: Set a product as disabled for the menu. This is just a logical delete.
+      operationId: disableProducts
+      parameters:
+        - name: productId
+          in: path
+          description: Identifier of the product
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 20
+            example: '67223d0a3d757282382b7bd5'
+      responses:
+        '200':
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedProductItem'
+        '204':
+          description: No Content.
+          content:
+            application/json: {}
+        '400':
+          description: Bad Request. There was an error processing the input data.
+        '404':
+          description: Not found. Product could not be found with such id.
+        '500':
+          description: Internal Server Error. Generic and unexpected error of the microservice.
+components:
+  schemas:
+    MenuProductList:
+      type: array
+      items:
+        $ref: '#/components/schemas/ProductItem'
+    ProductItem:
+      type: object
+      properties:
+        name:
+          description: Name of the product.
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: 'Latte'
+        price:
+          description: Price assigned to a product.
+          type: number
+          format: double
+          example: 3.99
+        type:
+          $ref: '#/components/schemas/ProductTypeEnum'
+        isEnabled:
+          description: Flag for filtering enabled products (by default will be true).
+          type: boolean
+          example: true
+          default: true
+      required:
+        - name
+        - price
+    ProductTypeEnum:
+      type: string
+      description: Types for different products (drinks or food).
+      example: 'DRINK'
+      default: 'ALL'
+      enum:
+        - ALL
+        - DRINK
+        - FOOD
+    SavedProductItem:
+      type: object
+      properties:
+        id:
+          description: Identifier of the Product.
+          type: string
+          example: '67223d0a3d757282382b7bd5'
+        savedAt:
+          description: Information about the date and time when the product was saved.
+          type: string
+          format: date-time
+          example: '2024-10-30T17:32:28Z'
+    ProductInfo:
+      type: object
+      properties:
+        price:
+          description: Price assigned to a product.
+          type: number
+          format: double
+          example: 3.99
+        isEnabled:
+          description: Flag for filtering enabled products (by default will be true).
+          type: boolean
+          example: true

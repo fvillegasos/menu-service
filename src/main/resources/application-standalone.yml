@@ -1,0 +1,7 @@
+spring:
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: coffeshop
+      uri: mongodb://localhost:27017/menu-service
