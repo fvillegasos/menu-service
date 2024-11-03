@@ -11,6 +11,8 @@ import com.fvillegasos.coffeeshop.menuservice.model.ProductItem;
 import com.fvillegasos.coffeeshop.menuservice.model.ProductTypeEnum;
 import com.fvillegasos.coffeeshop.menuservice.model.SavedProductItem;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -27,6 +29,7 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ProductItem> getMenuItems(ProductTypeEnum type, Boolean isEnabled) {
         var menuItems = menuItemRepository.findAllByEnabled(type.getValue(), isEnabled);
 
@@ -38,6 +41,7 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
+    @Transactional
     public SavedProductItem disableMenuItem(String productId) {
         var menuItem = this.findMenuItem(productId);
 
@@ -52,6 +56,7 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
+    @Transactional
     public SavedProductItem saveMenuItem(ProductItem productItem) {
         var menuItem = menuItemMapper.fromProductItemToMenuItem(productItem);
 
@@ -61,6 +66,7 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
+    @Transactional
     public SavedProductItem updateMenuItem(String productId, ProductInfo productInfo) {
         var menuItem = this.findMenuItem(productId);
 
@@ -72,6 +78,7 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public MenuItem findMenuItem(String id) {
         var menuItemOpt = menuItemRepository.findById(id);
         return menuItemOpt.orElseThrow(() ->
